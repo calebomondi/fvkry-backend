@@ -1,0 +1,20 @@
+{
+  "name": "fvkry-be",
+  "version": "1.0.0",
+  "description": "FVKRY PRVNTA Backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index"
+  },
+  "keywords": [],
+  "author": "Kaleb Mokua",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
