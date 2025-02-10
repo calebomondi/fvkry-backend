@@ -1,8 +1,8 @@
 import express from 'express'
-import { lockETH } from '../controllers/writeControllers.js';
+import { lockAsset } from '../controllers/writeControllers.js';
 
 const writeRouter = express.Router();
 
-writeRouter.route("/lockETH").post(lockETH);
+writeRouter.route("/lockAsset").post(lockAsset);
 
 export default writeRouter;
