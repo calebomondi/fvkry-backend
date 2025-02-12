@@ -3,6 +3,7 @@ import cors from 'cors'
 import { config } from 'dotenv'
 
 import writeRouter from './routes/writeRoutes.js';
+import utilRouter from './routes/utilRoutes.js';
 
 config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 
 //routes
 app.use('/api/write', writeRouter);
+app.use('/api/utils', utilRouter);
 
 app.listen(PORT, () => {
     console.log("Server Listening At Port ", PORT);

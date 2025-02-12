@@ -25,6 +25,7 @@ export const lockAsset = async (req, res) => {
             .insert({
                 user_address: address,
                 asset_address: zeroAddress,
+                asset_symbol: lockData.symbol,
                 title: lockData.title,
                 vault_type: lockData.durationType,
                 lock_type: lockData.lockType,
