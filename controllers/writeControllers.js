@@ -33,7 +33,9 @@ export const lockAsset = async (req, res) => {
                 start_time: startTime.toISOString(),
                 end_time: endTime.toISOString(),
                 unlock_goal_usd: Number(lockData.goal),
-                schedule: 0,
+                unlock_schedule: 0,
+                next_unlock: endTime.toISOString(),
+                unlock_amount: 0,
                 updated_at: new Date().toISOString()
             })
             .select();

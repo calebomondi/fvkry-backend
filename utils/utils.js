@@ -18,7 +18,10 @@ export const combinedVaultData = (bcData, dbData) => {
                 lock_type: dbItem.lock_type,
                 withdrawn: matchingBcItem.withdrawn,
                 asset_address: dbItem.asset_address,
-                asset_symbol: dbItem.asset_symbol
+                asset_symbol: dbItem.asset_symbol,
+                unlock_schedule: dbItem.unlock_schedule,
+                next_unlock: dbItem.next_unlock,
+                unlock_amount: dbItem.unlock_amount
             };
         }
         return null;
