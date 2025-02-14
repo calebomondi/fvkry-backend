@@ -1,7 +1,5 @@
 import supabase from '../database/db.js';
 
-const zeroAddress = "0x0000000000000000000000000000000000000000";
-
 //lock
 export const lockAsset = async (req, res) => {
     const {address, lockData} = req.body;
@@ -24,8 +22,9 @@ export const lockAsset = async (req, res) => {
             .from('vaults')
             .insert({
                 user_address: address,
-                asset_address: zeroAddress,
+                asset_address: lockData.token,
                 asset_symbol: lockData.symbol,
+                decimals: lockData.decimals,
                 title: lockData.title,
                 vault_type: lockData.durationType,
                 lock_type: lockData.lockType,

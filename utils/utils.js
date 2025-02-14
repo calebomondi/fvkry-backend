@@ -2,10 +2,9 @@
 export const combinedVaultData = (bcData, dbData) => {
     const combinedData = dbData.map(dbItem => {
         const matchingBcItem = bcData.find(bcItem => 
-            bcItem.title === dbItem.title && dbItem.asset_address === String(bcItem.token) &&
-            (dbItem.asset_address === "0x0000000000000000000000000000000000000000" ?
-                Number(BigInt(bcItem.amount)) / 10**18 === dbItem.amount : 
-                parseFloat(bcItem.amount) === dbItem.amount) 
+            bcItem.title === dbItem.title && 
+            dbItem.asset_address === String(bcItem.token) &&
+            Number(BigInt(bcItem.amount)) / 10**dbItem.decimals === dbItem.amount
         );
 
         if (matchingBcItem) {
