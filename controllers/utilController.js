@@ -3,14 +3,13 @@ import { combinedVaultData } from "../utils/utils.js";
 
 //combine data from db with that from sm
 export const combineData = async (req, res) => {
-    const { address, vaultType, bcData } = req.body;
+    const { address, bcData } = req.body;
 
     try {
         const { data, error } = await supabase
         .from("vaults")
         .select("*")
-        .eq("user_address",address)
-        .eq("vault_type",vaultType);
+        .eq("user_address",address);
         
         if (error) throw error
 
