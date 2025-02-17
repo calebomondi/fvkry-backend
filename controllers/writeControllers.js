@@ -65,3 +65,31 @@ export const lockAsset = async (req, res) => {
     }
 }
 
+//update lock schedule
+export const lockSchedule = async (req, res) => {
+    const {scheduleData} = req.body;
+    try {
+        const {data,error} = await supabase
+        .from('vaults')
+        .update({
+            unlock_schedule: scheduleData.duration,
+            next_unlock: scheduleData.nextUnlock,
+            unlock_amount: scheduleData.amount,
+            unlock_type:scheduleData.unlockType,
+            updated_at: new Date().toISOString()
+        })
+        .eq("user_address", scheduleData.userAddress)
+        .eq("asset_symbol", scheduleData.assetSymbol)
+        .eq("title", scheduleData.lockTitle)
+        .eq("amount", scheduleData.lockAmount)
+        .select();
+
+        if (error) throw error;
+
+        console.log('Data: ', data);
+
+        res.status(200).json({status: true});
+    } catch (error) {
+        res.status(500).json({ message: 'Could Not Add Schedule!', error: error.message });
+    }
+}

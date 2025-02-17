@@ -20,7 +20,8 @@ export const combinedVaultData = (bcData, dbData) => {
                 asset_symbol: dbItem.asset_symbol,
                 unlock_schedule: dbItem.unlock_schedule,
                 next_unlock: dbItem.next_unlock,
-                unlock_amount: dbItem.unlock_amount
+                unlock_amount: dbItem.unlock_amount,
+                unlock_type: dbItem.unlock_type
             };
         }
         return null;
