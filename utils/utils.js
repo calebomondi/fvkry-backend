@@ -18,6 +18,7 @@ export const combinedVaultData = (bcData, dbData) => {
                 withdrawn: matchingBcItem.withdrawn,
                 asset_address: dbItem.asset_address,
                 asset_symbol: dbItem.asset_symbol,
+                decimals: dbItem.decimals,
                 unlock_schedule: dbItem.unlock_schedule,
                 next_unlock: dbItem.next_unlock,
                 unlock_amount: dbItem.unlock_amount,
