@@ -93,3 +93,28 @@ export const lockSchedule = async (req, res) => {
         res.status(500).json({ message: 'Could Not Add Schedule!', error: error.message });
     }
 }
+
+//update amount
+export const updateLock = async (req, res) => {
+    const {address,newData} = req.body;
+    try {
+        const {data,error} = await supabase
+        .from('vaults')
+        .update({
+            amount: newData.updatedAmount,
+            updated_at: new Date().toISOString()
+        })
+        .eq("user_address", address)
+        .eq("asset_symbol", newData.assetSymbol)
+        .eq("title", newData.title)
+        .select();
+
+        if (error) throw error;
+
+        console.log('Data: ', data);
+
+        res.status(200).json({status: true});
+    } catch (error) {
+        res.status(500).json({ message: 'Could Not Add Schedule!', error: error.message });
+    }
+}
