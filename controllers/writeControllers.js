@@ -118,3 +118,25 @@ export const updateLock = async (req, res) => {
         res.status(500).json({ message: 'Could Not Add Schedule!', error: error.message });
     }
 }
+
+//delete lock
+export const deleteLock = async (req, res) => {
+    const {address,vault} = req.body;
+    try {
+        const {error} = await supabase
+        .from('vaults')
+        .delete()
+        .eq("user_address", address)
+        .eq("asset_symbol", vault.assetSymbol)
+        .eq("title", vault.title)
+        .eq("vault_type", vault.vaultType)
+
+        if (error) throw error;
+
+        console.log('Data: ', data);
+
+        res.status(200).json({status: true});
+    } catch (error) {
+        res.status(500).json({ message: 'Could Not Add Schedule!', error: error.message });
+    }
+}
