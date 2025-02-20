@@ -32,3 +32,156 @@ export const combinedVaultData = (bcData, dbData) => {
 
     return combinedData
 }
+
+export const analyzeUserVaults = (userVaults, userAddress) => {
+    
+    if (userVaults.length === 0) {
+      return { error: "No vaults found for this user" };
+    }
+    
+    // 1. Calculate average lock time (in days) for all assets and by asset type
+    const now = new Date();
+    const calculateLockDays = (start, end) => {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      return Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+    };
+    
+    let totalLockDays = 0;
+    const assetLockDays = {};
+    const assetCounts = {};
+    
+    userVaults.forEach(vault => {
+      const days = calculateLockDays(vault.start_time, vault.end_time);
+      totalLockDays += days;
+      
+      if (!assetLockDays[vault.asset_symbol]) {
+        assetLockDays[vault.asset_symbol] = 0;
+        assetCounts[vault.asset_symbol] = 0;
+      }
+      
+      assetLockDays[vault.asset_symbol] += days;
+      assetCounts[vault.asset_symbol]++;
+    });
+    
+    const avgLockDays = totalLockDays / userVaults.length;
+    
+    const avgLockDaysByAsset = Object.keys(assetLockDays).map(symbol => ({
+      symbol,
+      avgDays: assetLockDays[symbol] / assetCounts[symbol]
+    }));
+    
+    // 2. Get unique assets locked
+    const uniqueAssets = [...new Set(userVaults.map(vault => vault.asset_address))].map(address => {
+      const vault = userVaults.find(v => v.asset_address === address);
+      return {
+        address,
+        symbol: vault.asset_symbol,
+        name: vault.title ? vault.title.split(" ").pop() : vault.asset_symbol
+      };
+    });
+    
+    // 3. Find upcoming unlocks (within 7 days)
+    const upcomingUnlocks = userVaults
+      .filter(vault => {
+        const unlockDate = new Date(vault.next_unlock);
+        const daysUntilUnlock = Math.ceil((unlockDate - now) / (1000 * 60 * 60 * 24));
+        return daysUntilUnlock >= 0 && daysUntilUnlock <= 7;
+      })
+      .map(vault => ({
+        id: vault.vault_id,
+        title: vault.title,
+        asset: vault.asset_symbol,
+        unlockDate: vault.next_unlock,
+        daysRemaining: Math.ceil((new Date(vault.next_unlock) - now) / (1000 * 60 * 60 * 24)),
+        amount: vault.unlock_amount > 0 ? vault.unlock_amount : vault.amount
+      }));
+    
+    // 4. Calculate total amount by asset
+    const assetTotals = {};
+    userVaults.forEach(vault => {
+      if (!assetTotals[vault.asset_symbol]) {
+        assetTotals[vault.asset_symbol] = {
+          symbol: vault.asset_symbol,
+          totalAmount: 0,
+          decimals: vault.decimals,
+          address: vault.asset_address
+        };
+      }
+      
+      // Convert from string to number and handle decimals
+      const amount = parseFloat(vault.amount);
+      assetTotals[vault.asset_symbol].totalAmount += amount;
+    });
+    
+    // 5. Total combined value (assuming we have USD values)
+    // For demonstration, I'll assume ETH is $3000 and MAN is $1
+    const assetPrices = {
+      'ETH': 3000,
+      'MAN': 1
+    };
+    
+    let totalValueUSD = 0;
+    const assetValues = Object.values(assetTotals).map(asset => {
+      const price = assetPrices[asset.symbol] || 0;
+      const valueUSD = asset.totalAmount * price;
+      totalValueUSD += valueUSD;
+      
+      return {
+        ...asset,
+        valueUSD,
+        price
+      };
+    });
+    
+    // 6. Count locks by type
+    const lockTypeCounts = {
+      fixed: userVaults.filter(v => v.lock_type === 'fixed').length,
+      goal: userVaults.filter(v => v.lock_type === 'goal').length
+    };
+    
+    // 7. Additional analysis
+    // Calculate lock type distribution by asset
+    const lockTypeByAsset = {};
+    userVaults.forEach(vault => {
+      if (!lockTypeByAsset[vault.asset_symbol]) {
+        lockTypeByAsset[vault.asset_symbol] = { fixed: 0, goal: 0 };
+      }
+      lockTypeByAsset[vault.asset_symbol][vault.lock_type]++;
+    });
+    
+    // Calculate lock duration distribution
+    const durationDistribution = {
+      days: userVaults.filter(v => v.vault_type === 'days').length,
+      weeks: userVaults.filter(v => v.vault_type === 'weeks').length,
+      months: userVaults.filter(v => v.vault_type === 'months').length
+    };
+    
+    // Monthly locking activity (count of locks started by month)
+    const monthlyActivity = {};
+    userVaults.forEach(vault => {
+      const month = vault.start_time.substring(0, 7); // Format: YYYY-MM
+      if (!monthlyActivity[month]) {
+        monthlyActivity[month] = 0;
+      }
+      monthlyActivity[month]++;
+    });
+    
+    // Return the complete analysis
+    return {
+      userAddress,
+      totalVaults: userVaults.length,
+      avgLockDays,
+      avgLockDaysByAsset,
+      uniqueAssets,
+      upcomingUnlocks,
+      assetTotals: Object.values(assetTotals),
+      assetValues,
+      totalValueUSD,
+      lockTypeCounts,
+      lockTypeByAsset,
+      durationDistribution,
+      monthlyActivity: Object.entries(monthlyActivity).map(([month, count]) => ({ month, count })),
+      vaults: userVaults // Include the raw vaults for any additional processing on the client
+    };
+};

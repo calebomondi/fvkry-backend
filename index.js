@@ -4,6 +4,7 @@ import { config } from 'dotenv'
 
 import writeRouter from './routes/writeRoutes.js';
 import utilRouter from './routes/utilRoutes.js';
+import readRouter from './routes/readRoutes.js';
 
 config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 //routes
 app.use('/api/write', writeRouter);
 app.use('/api/utils', utilRouter);
+app.use('/api/read', readRouter);
 
 app.listen(PORT, () => {
     console.log("Server Listening At Port ", PORT);
