@@ -2,7 +2,7 @@ import supabase from "../database/db.js";
 import { analyzeUserVaults } from "../utils/utils.js";
 
 export const dashboardAnalysis = async (req, res) => {
-    const {userAddress} = req.body;
+    const userAddress = req.query.userAddress;
 
     try {
         const {data,error} = await supabase
