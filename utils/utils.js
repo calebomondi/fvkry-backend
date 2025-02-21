@@ -44,6 +44,9 @@ export const analyzeUserVaults = (userVaults, userAddress) => {
     const calculateLockDays = (start, end) => {
       const startDate = new Date(start);
       const endDate = new Date(end);
+      if (endDate <= now) {
+        return 0;
+      }
       return Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
     };
     
