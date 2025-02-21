@@ -12,8 +12,6 @@ export const dashboardAnalysis = async (req, res) => {
 
         if (error) throw error;
 
-        console.log(data);
-
         const analysis = analyzeUserVaults(data, userAddress);
         
         res.status(200).json(analysis);
