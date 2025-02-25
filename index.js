@@ -6,6 +6,7 @@ import writeRouter from './routes/writeRoutes.js';
 import utilRouter from './routes/utilRoutes.js';
 import readRouter from './routes/readRoutes.js';
 import homeRouter from './routes/homeRoute.js';
+import healthRouter from './routes/healthRoutes.js';
 
 config();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use('/api/write', writeRouter);
 app.use('/api/utils', utilRouter);
 app.use('/api/read', readRouter);
+app.use('/api/health', healthRouter);
 app.use('/', homeRouter);
 
 app.listen(PORT, () => {
