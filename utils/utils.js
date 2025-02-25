@@ -188,3 +188,57 @@ export const analyzeUserVaults = (userVaults, userAddress) => {
       vaults: userVaults // Include the raw vaults for any additional processing on the client
     };
 };
+
+export const myHealthCheck = (data, senderAddress) => {
+  if (!data || !data.operations || !Array.isArray(data.operations)) {
+    throw new Error('Invalid input data structure');
+  }
+
+  // Filter operations by sender address if provided
+  const filteredOperations = senderAddress 
+    ? data.operations.filter(op => op.from.toLowerCase() === senderAddress.toLowerCase())
+    : data.operations;
+
+  return filteredOperations.map(operation => {
+    // Calculate human-readable token amount based on decimals
+    const decimals = parseInt(operation.tokenInfo.decimals, 10);
+    const rawValue = operation.value;
+    const tokenAmount = rawValue / Math.pow(10, decimals);
+    
+    // Calculate USD value at time of transaction
+    const tokenPrice = operation.tokenInfo.price.rate;
+    const usdValue = tokenAmount * tokenPrice;
+    
+    // Format timestamp to human-readable date
+    const date = new Date(operation.timestamp * 1000);
+    const formattedDate = date.toISOString();
+    
+    return {
+      // Transaction details
+      timestamp: operation.timestamp,
+      formattedDate,
+      
+      // Token details
+      token: {
+        address: operation.tokenInfo.address,
+        name: operation.tokenInfo.name,
+        symbol: operation.tokenInfo.symbol,
+        decimals: decimals
+      },
+      
+      // Price information
+      priceInfo: {
+        priceAtTransaction: 0,
+        currency: operation.tokenInfo.price.currency,
+        priceNow: tokenPrice
+      },
+      
+      // Transfer details
+      transfer: {
+        rawValue: rawValue,
+        tokenAmount: tokenAmount,
+        usdValue: usdValue
+      }
+    };
+  });
+}
