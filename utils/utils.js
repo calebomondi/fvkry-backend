@@ -121,7 +121,9 @@ export const analyzeUserVaults = (userVaults, userAddress) => {
     // For demonstration, I'll assume ETH is $3000 and MAN is $1
     const assetPrices = {
       'ETH': 3000,
-      'MAN': 1
+      'MAN': 1,
+      'LRT': 0.05,
+      'MEG': 21
     };
     
     let totalValueUSD = 0;
