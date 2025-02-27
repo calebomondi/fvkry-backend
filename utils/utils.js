@@ -117,8 +117,7 @@ export const analyzeUserVaults = (userVaults, userAddress) => {
       assetTotals[vault.asset_symbol].totalAmount += amount;
     });
     
-    // 5. Total combined value (assuming we have USD values)
-    // For demonstration, I'll assume ETH is $3000 and MAN is $1
+    //Asset prices
     const assetPrices = {
       'ETH': 3000,
       'MAN': 1,
