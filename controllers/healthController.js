@@ -9,7 +9,7 @@ export const healthCheck = async(req, res) => {
     const response = await axios.get(url);
 
     //refine responses
-    const data = myHealthCheck(response.data, address);
+    const data = await myHealthCheck(response.data, address);
 
     res.status(200).json(data);
 }

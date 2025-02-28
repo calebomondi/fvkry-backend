@@ -1,3 +1,8 @@
+import axios from "axios";
+import { config } from "dotenv";
+
+config();
+
 // combine dbData and bcData
 export const combinedVaultData = (bcData, dbData) => {
     const combinedData = dbData.map(dbItem => {
@@ -190,7 +195,53 @@ export const analyzeUserVaults = (userVaults, userAddress) => {
     };
 };
 
-export const myHealthCheck = (data, senderAddress) => {
+// MY HEALTH CHECK HELPER FUNCTIONS
+//1. Get token list
+const getTokenList = async () => {
+  const url = 'https://api.coingecko.com/api/v3/coins/list';
+  const options = {
+    headers: {'Content-Type': 'application/json', 'x-cg-demo-api-key': process.env.GECKO_API_KEY}
+  };
+  const response = await axios.get(url, options);
+  return response.data;
+}
+
+//2. Get gecko token ID
+const getTokenID = async (tokenSymbol) => {
+  const tokenList = await getTokenList();
+  const token = tokenList.find(t => t.symbol === tokenSymbol.toLowerCase());
+  return token ? token.id : null;
+}
+
+//3. Calculate token transanction date
+const getTransanctionDate = (timestamp) => {
+  const date = new Date(timestamp * 1000);
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${day}-${month}-${year}`;
+}
+
+//4. Get token price
+const getTokenPrice = async (tokenSymbol, timestamp) => {
+  //get token id and date 
+  const tokenID = await getTokenID(tokenSymbol);
+  const date = getTransanctionDate(timestamp);
+
+  await new Promise(resolve => setTimeout(resolve, 1200));
+
+  //ftech price
+  const url = `https://api.coingecko.com/api/v3/coins/${tokenID}/history?date=${date}`;
+  const options = {
+    headers: {'Content-Type': 'application/json', 'x-cg-demo-api-key': process.env.GECKO_API_KEY}
+  };
+  const response = await axios.get(url, options);
+
+  return response.data.market_data.current_price.usd;
+}
+
+//5. Get health check
+export const myHealthCheck = async (data, senderAddress) => {
   if (!data || !data.operations || !Array.isArray(data.operations)) {
     throw new Error('Invalid input data structure');
   }
@@ -200,46 +251,67 @@ export const myHealthCheck = (data, senderAddress) => {
     ? data.operations.filter(op => op.from.toLowerCase() === senderAddress.toLowerCase())
     : data.operations;
 
-  return filteredOperations.map(operation => {
-    // Calculate human-readable token amount based on decimals
-    const decimals = parseInt(operation.tokenInfo.decimals, 10);
-    const rawValue = operation.value;
-    const tokenAmount = rawValue / Math.pow(10, decimals);
-    
-    // Calculate USD value at time of transaction
-    const tokenPrice = operation.tokenInfo.price.rate;
-    const usdValue = tokenAmount * tokenPrice;
-    
-    // Format timestamp to human-readable date
-    const date = new Date(operation.timestamp * 1000);
-    const formattedDate = date.toISOString();
-    
-    return {
-      // Transaction details
-      timestamp: operation.timestamp,
-      formattedDate,
+    const results = await Promise.all(filteredOperations.map(async (operation) => {
+      // Calculate human-readable token amount based on decimals
+      const decimals = parseInt(operation.tokenInfo.decimals, 10);
+      const rawValue = operation.value;
+      const tokenAmount = rawValue / Math.pow(10, decimals);
       
-      // Token details
-      token: {
-        address: operation.tokenInfo.address,
-        name: operation.tokenInfo.name,
-        symbol: operation.tokenInfo.symbol,
-        decimals: decimals
-      },
+      // Calculate USD value at time of transaction
+      const thenPrice = await getTokenPrice(operation.tokenInfo.symbol, operation.timestamp);
+      const value_then = tokenAmount * thenPrice;
+  
+      // Get USD value now
+      const tokenPrice = operation.tokenInfo.price.rate;
+      const value_now = tokenAmount * tokenPrice;
       
-      // Price information
-      priceInfo: {
-        priceAtTransaction: 0,
-        currency: operation.tokenInfo.price.currency,
-        priceNow: tokenPrice
-      },
+      // Format timestamp to human-readable date
+      const date = new Date(operation.timestamp * 1000);
+      const formattedDate = date.toISOString();
       
-      // Transfer details
-      transfer: {
-        rawValue: rawValue,
-        tokenAmount: tokenAmount,
-        usdValue: usdValue
-      }
-    };
-  });
+      return {
+        // Transaction details
+        timestamp: operation.timestamp,
+        formattedDate,
+        
+        // Token details
+        token: {
+          address: operation.tokenInfo.address,
+          name: operation.tokenInfo.name,
+          symbol: operation.tokenInfo.symbol,
+          decimals: decimals
+        },
+        
+        // Price information
+        priceInfo: {
+          priceAtTransaction: thenPrice,
+          currency: operation.tokenInfo.price.currency,
+          priceNow: tokenPrice
+        },
+        
+        // Transfer details
+        transfer: {
+          rawValue: rawValue,
+          tokenAmount: tokenAmount,
+          value_now: value_now,
+          value_then: value_then
+        }
+      };
+    }));
+    
+    return results;
 }
+
+/**
+const url = 'https://api.coingecko.com/api/v3/coins/the-graph/history?date=28-11-2024';
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', 'x-cg-demo-api-key': 'CG-VkNbpY53xafGFAsu6DYSguWN'}
+};
+
+const url = 'https://api.coingecko.com/api/v3/coins/list';
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', 'x-cg-demo-api-key': 'CG-VkNbpY53xafGFAsu6DYSguWN'}
+};
+ */
