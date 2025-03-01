@@ -246,10 +246,13 @@ export const myHealthCheck = async (data, senderAddress) => {
     throw new Error('Invalid input data structure');
   }
 
+  const now = Math.floor(Date.now() / 1000);
+  const oneYearAgo = now - (365 * 24 * 60 * 60);
+
   // Filter operations by sender address if provided
-  const filteredOperations = senderAddress 
-    ? data.operations.filter(op => op.from.toLowerCase() === senderAddress.toLowerCase())
-    : data.operations;
+  const filteredOperations = data.operations
+  .filter(op => (op.from.toLowerCase() === senderAddress.toLowerCase()))
+  .filter(op => op.timestamp >= oneYearAgo);
 
     const results = await Promise.all(filteredOperations.map(async (operation) => {
       // Calculate human-readable token amount based on decimals
@@ -264,6 +267,9 @@ export const myHealthCheck = async (data, senderAddress) => {
       // Get USD value now
       const tokenPrice = operation.tokenInfo.price.rate;
       const value_now = tokenAmount * tokenPrice;
+
+      //PnL
+      const value_diff = value_now - value_then;
       
       // Format timestamp to human-readable date
       const date = new Date(operation.timestamp * 1000);
@@ -284,34 +290,21 @@ export const myHealthCheck = async (data, senderAddress) => {
         
         // Price information
         priceInfo: {
-          priceAtTransaction: thenPrice,
+          priceAtTransaction: thenPrice.toFixed(2),
           currency: operation.tokenInfo.price.currency,
-          priceNow: tokenPrice
+          priceNow: tokenPrice.toFixed(2)
         },
         
         // Transfer details
         transfer: {
           rawValue: rawValue,
-          tokenAmount: tokenAmount,
-          value_now: value_now,
-          value_then: value_then
+          tokenAmount: tokenAmount.toFixed(2),
+          value_now: value_now.toFixed(2),
+          value_then: value_then.toFixed(2),
+          value_diff: value_diff.toFixed(2)
         }
       };
     }));
     
     return results;
 }
-
-/**
-const url = 'https://api.coingecko.com/api/v3/coins/the-graph/history?date=28-11-2024';
-const options = {
-  method: 'GET',
-  headers: {accept: 'application/json', 'x-cg-demo-api-key': 'CG-VkNbpY53xafGFAsu6DYSguWN'}
-};
-
-const url = 'https://api.coingecko.com/api/v3/coins/list';
-const options = {
-  method: 'GET',
-  headers: {accept: 'application/json', 'x-cg-demo-api-key': 'CG-VkNbpY53xafGFAsu6DYSguWN'}
-};
- */
