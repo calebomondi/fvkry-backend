@@ -247,7 +247,7 @@ export const myHealthCheck = async (data, senderAddress) => {
   }
 
   const now = Math.floor(Date.now() / 1000);
-  const oneYearAgo = now - (365 * 24 * 60 * 60);
+  const oneYearAgo = now - (100 * 24 * 60 * 60);
 
   // Filter operations by sender address if provided
   const filteredOperations = data.operations

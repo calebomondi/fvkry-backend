@@ -138,3 +138,55 @@ export const deleteLock = async (req, res) => {
         res.status(500).json({ message: 'Could Delete Lock!', error: error.message });
     }
 }
+
+//award points
+export const awardPoints = async (req, res) => {
+    const {address, points} = req.body;
+    
+    //next check to be 100 from today
+    const nextcheck = new Date()
+    nextcheck.setDate(nextcheck.getDate() + 100)
+    
+    try {       
+        const {error} = await supabase
+        .from('platform_rewards')
+        .insert({
+            user_address: address,
+            fvkry_points: points,
+            redeemed: 0,
+            next_check: nextcheck
+        })
+        .select();
+
+        if (error) throw error;
+        
+        res.status(200).json({status: true});
+    } catch (error) {
+        res.status(500).json({ message: 'Could Not Add Points!', error: error.message });
+    }
+}
+
+export const updatePoints = async (req, res) => {
+    const {address, points} = req.body;
+
+    //next check to be 100 from today
+    const nextcheck = new Date()
+    nextcheck.setDate(nextcheck.getDate() + 100)
+
+    try {       
+        const {error} = await supabase
+        .from('platform_rewards')
+        .update({
+            fvkry_points: points,
+            next_check: nextcheck
+        })
+        .eq("user_address", address)
+        .select();
+
+        if (error) throw error;
+
+        res.status(200).json({status: true});
+    } catch (error) {
+        res.status(500).json({ message: 'Could Not Add Points!', error: error.message });
+    }
+}
