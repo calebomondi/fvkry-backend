@@ -29,7 +29,8 @@ export const combinedVaultData = (bcData, dbData) => {
                 unlock_amount: dbItem.unlock_amount,
                 unlock_type: dbItem.unlock_type,
                 vaultType: matchingBcItem.vaultType,
-                lockIndex: matchingBcItem.lockIndex
+                lockIndex: matchingBcItem.lockIndex,
+                chainId: dbItem.chain_id
             };
         }
         return null;

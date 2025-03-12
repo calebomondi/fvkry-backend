@@ -3,12 +3,14 @@ import { analyzeUserVaults } from "../utils/utils.js";
 
 export const dashboardAnalysis = async (req, res) => {
     const userAddress = req.query.userAddress;
+    const chainId = req.query.chainId;
 
     try {
         const {data,error} = await supabase
         .from('vaults')
         .select("*")
-        .eq("user_address", userAddress);
+        .eq("user_address", userAddress)
+        .eq("chain_id", chainId);
 
         if (error) throw error;
 

@@ -9,7 +9,8 @@ export const combineData = async (req, res) => {
         const { data, error } = await supabase
         .from("vaults")
         .select("*")
-        .eq("user_address",address);
+        .eq("user_address",address)
+        .eq("chain_id", chainId);
         
         if (error) throw error
 

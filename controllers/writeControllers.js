@@ -23,6 +23,7 @@ export const lockAsset = async (req, res) => {
             .insert({
                 user_address: address,
                 asset_address: lockData.token,
+                chain_id: lockData.chainId,
                 asset_symbol: lockData.symbol,
                 decimals: lockData.decimals,
                 title: lockData.title,
@@ -82,6 +83,7 @@ export const lockSchedule = async (req, res) => {
         .eq("asset_symbol", scheduleData.assetSymbol)
         .eq("title", scheduleData.lockTitle)
         .eq("amount", scheduleData.lockAmount)
+        .eq("chain_id", scheduleData.chainId)
         .select();
 
         if (error) throw error;
@@ -107,6 +109,7 @@ export const updateLock = async (req, res) => {
         .eq("user_address", address)
         .eq("asset_symbol", newData.assetSymbol)
         .eq("title", newData.title)
+        .eq("chain_id", newData.chainId)
         .select();
 
         if (error) throw error;
@@ -130,6 +133,7 @@ export const deleteLock = async (req, res) => {
         .eq("asset_symbol", vault.assetSymbol)
         .eq("title", vault.title)
         .eq("vault_type", vault.vaultType)
+        .eq("chain_id", vault.chainId)
 
         if (error) throw error;
 
