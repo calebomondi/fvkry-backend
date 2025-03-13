@@ -3,7 +3,7 @@ import { combinedVaultData } from "../utils/utils.js";
 
 //combine data from db with that from sm
 export const combineData = async (req, res) => {
-    const { address, bcData } = req.body;
+    const { address, bcData, chainId } = req.body;
 
     try {
         const { data, error } = await supabase
