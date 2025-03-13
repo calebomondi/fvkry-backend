@@ -114,8 +114,6 @@ export const updateLock = async (req, res) => {
 
         if (error) throw error;
 
-        console.log('Data: ', data);
-
         res.status(200).json({status: true});
     } catch (error) {
         res.status(500).json({ message: 'Could Not Add Schedule!', error: error.message });
